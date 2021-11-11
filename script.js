@@ -1,47 +1,99 @@
-function buildQuiz() {
+function buildQuiz(){
+
 	const output = [];
-	questions.forEach(
+
+	myQuestions.forEach(
 		(currentQuestion, questionNumber) => {
-			const answers = [];
-			for (letter in currentQuestion.answers) {
-				answers.push(
-					`<label>
-					<input type="radio" name="question$[questionNumber}" value="${letter}">
-					${letter} :
-					${currentQuestion.answers[letter]}
-					</label> <br>`
-					);
-			}
 
-			// add this question and its answers to the output
-			output.push(
-				`<div class="question"> ${currentQuestion.question} </div>
-				<div class="answers"> ${answers.join('')} </div> <br>`
+		const answers = [];
+
+		for(letter in currentQuestion.answers) {
+
+			answers.push(
+				`<label>
+				<input type="radio" name="question${questionNumber}" value="${letter}">
+				${letter} <br>
+				</label>`
 				);
+		}
 
-		});
 
-	//combine output list into one string of html and put it on the page
-	quizContainer.innerHTML = output.join('');
+		output.push(
+			`<div class="question"> ${currentQuestion.question} </div>
+			<div class="answers"> ${answers.join('')} </div>
+			<br>`)
+
+	});
+
+quizContainer.innerHTML = output.join('');
 
 }
 
 
 
-function showResults() {
 
-	// gather answer containers from quiz
+function showResults(){
+
 	const answerContainers = quizContainer.querySelectorAll('.answers');
 
-	// keep track of user's answers
-	let numCorrect = 0;
+	let babyScore = 0;
+	let nailsScore = 0;
+	let isThisScore = 0;
+	let supremacyScore = 0;
+	let allScores = [];
+	let counts = {};
+
+	myQuestions.forEach( (currentQuestion, questionNumber) => {
+
+		const answerContainer = answerContainers[questionNumber];
+		const selector = `input[name=question${questionNumber}]:checked`;
+		const userAnswer = (answerContainer.querySelector(selector) || {}).value;
+
+		allScores.push.apply(allScores, myQuestions[questionNumber].answers[`${userAnswer}`]);
+	})
+
+
+		allScores.forEach((x) => {
+			counts[x] = (counts[x] || 0) + 1;
+		})
+
+		for (let i = 0; i < allScores.length; i++) {
+			if (allScores[i] === "isThis") {
+				isThisScore++;
+			} else if (allScores[i] === "nails") {
+				nailsScore++;
+			} else if (allScores[i] === "supremacy") {
+				supremacyScore++; 
+			} else if (allScores[i] === "baby") {
+				babyScore++;
+			}
+		}
+
+	let totals = [babyScore, nailsScore, isThisScore, supremacyScore];
+		totals.sort(function(a, b){return b - a});
+
+
+		if (babyScore > nailsScore && babyScore > isThisScore && babyScore > supremacyScore) {
+			document.getElementById("results").innerHTML = '<img src="result1.png">';
+			console.log("babbby");
+		} else if (isThisScore > babyScore && isThisScore > nailsScore && isThisScore > supremacyScore) {
+			document.getElementById("results").innerHTML = '<img src="result2.jpg">';
+		} else if (nailsScore > babyScore && nailsScore > isThisScore && nailsScore > supremacyScore) {
+			document.getElementById("results").innerHTML = '<img src="result3.jpg">';
+		} else if (supremacyScore > babyScore && supremacyScore > isThisScore && supremacyScore > nailsScore) {
+			document.getElementById("results").innerHTML = '<img src="result4.jpg">';
+		}
 
 
 }
+
+
+
+
+
 
 
 // variables
-
 
 const quizContainer = document.getElementById('quiz');
 const resultsContainer = document.getElementById('results');
@@ -54,80 +106,72 @@ let nails = 0;
 let supremacy = 0;
 let isThis = 0;
 
-// questions
 
-const questions = [
+const myQuestions = [
 
 	{
 		question: "Do you like babies?", 
 		answers: {
-			"YES omg": baby++,
-			"I don't care": isThis++, 
-			"I answer to a higher power": supremacy++
+			"YES omg": ["baby", "baby", "baby"],
+			"I don't care": ["isThis", "nails"],
+			"I answer to a higher power": ["supremacy", "supremacy"]
 		},
-		XXcorrectAnswer: ""
 	},
 	{
 		question: "If you had the chance to become a snail, would you?",
 		answers: {
-			a: "Of course I would",
-			b: "I know better than to challenge evolution"
+			"Of course I would": ["baby", "baby"],
+			"I know better than to challenge evolution": ["supremacy"], 
+			"No": ["isThis", "nails"]
 		}, 
-		XXcorrectAnswer: ""
 	},
 	{
 		question: "How do you usually express admiration?", 
 		answers: {
-			a: "Devotion", 
-			b: "Servitude",
-			c: "Costuming"
+			"Devotion": ["nails", "baby", "nails"],
+			"Servitude": ["supremacy", "supremacy"],
+			"Costuming": ["baby", "nails", "baby"], 
+			"Wonder": ["isThis", "isThis"]
 		}, 
-		XXcorrectAnswer: ""
 	}, 
 	{
 		question: "What do you think about eternal life?", 
 		answers: {
-			a: "You don't get a second chance at humanity.", 
-			b: "No matter how perfect the day is, it always has to end.",
-			c: "An unending, unchanging midnight."
+			"You don't get a second chance at humanity.":["nails", "isThis"],
+			"No matter how perfect the day is, it always has to end.": ["baby"],
+			"An unending, unchanging midnight.": ["supremacy"]
 		}, 
-		XXcorrectAnswer: ""
 	}, 
 	{
 		question: "Which of these sounds like the best compliment to you?", 
 		answers: {
-			a: "I don't have the strength to stay away from you anymore.", 
-			b: "Your scent is like a drug to me. My own personal brand of heroin.", 
-			c: "You're my only reason to stay alive...if that's what I am.", 
-			d: "You are my life now."
+			"I don't have the strength to stay away from you anymore.": ["isThis"],
+			"Your scent is like a drug to me. My own personal brand of heroin.": ["supremacy", "nails"],
+			"You're my only reason to stay alive...if that's what I am.": ["supremacy", "baby", "supremacy"],
+			"You are my life now.": ["baby", "supremacy", "baby"]
 		}, 
-		XXcorrectAnswer: ""
 	}, 
 	{
 		question: "Do you question authority or follow blindly?", 
 		answers: {
-			a: "Asking questions is how I connect to the deeper truth.", 
-			b: "It would be blasphemous to question the principles that bind us all together."
+			"Asking questions is how I connect to the deeper truth.": ["isThis", "isThis"], 
+			"It would be blasphemous to question the principles that bind us all together.": ["supremacy", "supremacy"]
 		}, 
-		XXcorrectAnswer: ""
 	}, 
 	{
 		question: "Which of these characters do you most identify with?", 
 		answers: {
-			a: "Emmett", 
-			b: "Rosalie", 
-			c: "Carlysle", 
-			d: "Jasper"
+			"Emmett": ["nails"],
+			"Rosalie": ["baby"], 
+			"Carlysle": ["supremacy"],
+			"Jasper": ["isThis"]
 		}, 
-		XXcorrectAnswer: "asdf"
 	}
 	];
 
 
-console.log(questions);
 
-// display quiz right away
+
+
 buildQuiz();
-
-// on submit, show results
 submitButton.addEventListener('click', showResults);
